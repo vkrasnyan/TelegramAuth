@@ -1,17 +1,22 @@
 import logging
 
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.http import HttpRequest, HttpResponse, HttpResponseBadRequest
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render, redirect
 
 
 from .models import TelegramProfile
 import secrets
 
-logger = logging.getLogger(__name__)
-def login_via_telegram(request):
+logger = logging.getLogger(__name__) # логирование добавлено для отладки
+def login_via_telegram(request: HttpRequest) -> HttpResponse:
+
+    """
+    Отображает страницу со ссылкой для аутентификации через Телеграм и генерирует токен для сессии и ссылки на Телеграм
+    """
+
     token = secrets.token_urlsafe(16)
     bot_username = 'myloginetbot'
     telegram_link = f"https://t.me/{bot_username}?start={token}"
@@ -21,7 +26,9 @@ def login_via_telegram(request):
     return render(request, 'login.html', {'telegram_link': telegram_link})
 
 
-def telegram_callback(request):
+def telegram_callback(request: HttpRequest) -> HttpResponse:
+    """Обрабатывает данные, полученные от Телеграм и логинит пользователя"""
+
     token = request.GET.get('token')
     telegram_id = request.GET.get('telegram_id')
     telegram_username = request.GET.get('username')
@@ -55,7 +62,6 @@ def telegram_callback(request):
                 auth_token=token
             )
 
-    # Логиним пользователя
     logger.info(f'Logging in user: {user.username}')
     login(request, user, backend='django.contrib.auth.backends.ModelBackend')
     if request.user.is_authenticated:
@@ -63,15 +69,16 @@ def telegram_callback(request):
     else:
         logger.error("User not logged in.")
 
-    # Принудительно обновляем сессию
     request.session.modified = True
     request.session.save()
     logger.info(f'Session updated for user: {user.username}')
 
-    # Редиректим на welcome
     return redirect('/welcome/')
 
 
-def welcome_view(request):
+@login_required
+def welcome_view(request: HttpRequest) -> HttpResponse:
+    """Отображает страницу приветствия после успешной авторизации."""
+
     context = {'username': request.user.username}
     return render(request, 'welcome.html', context)

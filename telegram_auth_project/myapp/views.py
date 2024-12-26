@@ -16,8 +16,12 @@ logger = logging.getLogger(__name__)
 
 
 class LoginViaTelegramView(View):
+    """
+    Отображает страницу со ссылкой для аутентификации через Телеграм и генерирует токен для сессии и ссылки на Телеграм
+    """
     def get(self, request, *args, **kwargs):
-        # Генерация токена для сессии и ссылки на Telegram
+        """Генерация токена для сессии и ссылки на Telegram"""
+
         telegram_auth = TelegramAuth(request)
         token = telegram_auth.generate_token()
         bot_username = 'myloginetbot'
@@ -30,6 +34,8 @@ class LoginViaTelegramView(View):
 
 
 class TelegramAuth:
+    """Кастомный класс для авторизации по данным, полученным через Телеграм"""
+
     name = "telegram"
     ID_KEY = "id"
 
@@ -38,13 +44,14 @@ class TelegramAuth:
         self.response = request.GET
 
     def generate_token(self):
-        # Генерация токена для сессии
+        """Генерация токена для сессии"""
         token = secrets.token_urlsafe(16)
         self.request.session['auth_token'] = token  # Сохраняем токен в сессии
         return token
 
     def verify_data(self):
-        bot_token = '7982653482:AAEtitxQYmgSn6dNLvQGLpMdAst-80cK5z4'
+        """Проверка полученных данных"""
+        bot_token = 'Your Telegram bot token'
         if bot_token is None:
             raise ValueError("SOCIAL_AUTH_TELEGRAM_BOT_TOKEN is not set")
 
@@ -54,7 +61,6 @@ class TelegramAuth:
         if received_hash_string is None or auth_date is None:
             raise ValueError("Missing parameters: hash or auth_date")
 
-        # Формируем строку для проверки
         data_check_string = [f"{k}={v}" for k, v in self.response.items() if k != "hash"]
         data_check_string = "\n".join(sorted(data_check_string))
         secret_key = hashlib.sha256(bot_token.encode()).digest()
@@ -64,7 +70,6 @@ class TelegramAuth:
         current_timestamp = int(time.time())
         auth_timestamp = int(auth_date)
 
-        # Проверка на дату
         if current_timestamp - auth_timestamp > 86400:
             raise ValueError("Auth date is outdated")
 
@@ -72,6 +77,7 @@ class TelegramAuth:
             raise ValueError("Invalid hash supplied")
 
     def get_user_details(self):
+        """Получение данных о пользователе"""
         first_name = self.response.get("first_name", "")
         last_name = self.response.get("last_name", "")
         fullname = f"{first_name} {last_name}".strip()
@@ -83,10 +89,10 @@ class TelegramAuth:
         }
 
     def authenticate_user(self):
+        "Аутентификация пользователя"
         self.verify_data()
         user_details = self.get_user_details()
 
-        # Поиск или создание пользователя
         telegram_id = self.response.get("id")
         telegram_username = self.response.get("username")
         try:
@@ -104,7 +110,6 @@ class TelegramAuth:
                 telegram_username=telegram_username
             )
 
-        # Логиним пользователя
         login(self.request, user)
         self.request.session.modified = True
         self.request.session.save()
@@ -113,17 +118,19 @@ class TelegramAuth:
 
 
 def telegram_callback(request):
+    """Валидация и перенаправление на страницу welcome.html"""
     try:
         telegram_auth = TelegramAuth(request)
-        user = telegram_auth.authenticate_user()  # Здесь происходит валидация
+        user = telegram_auth.authenticate_user()
         logger.info(f'User {user.username} logged in successfully')
-        return redirect('welcome')  # перенаправление на страницу welcome
+        return redirect('welcome')
     except ValueError as e:
         logger.error(f"Error during Telegram authentication: {e}")
         return HttpResponseBadRequest("Invalid Telegram authentication data.")
 
 
 class WelcomeView(View):
+    """Отображает страницу приветствия после успешной авторизации."""
     def get(self, request, *args, **kwargs):
         context = {'username': request.user.username}
         return render(request, 'welcome.html', context)

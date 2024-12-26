@@ -108,7 +108,7 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
-SOCIAL_AUTH_TELEGRAM_BOT_TOKEN = '7982653482:AAEtitxQYmgSn6dNLvQGLpMdAst-80cK5z4'
+SOCIAL_AUTH_TELEGRAM_BOT_TOKEN = 'YourBotToken'
 SOCIAL_AUTH_TELEGRAM_SCOPE = ['email', 'profile']
 SOCIAL_AUTH_TELEGRAM_EXTRA_DATA = ['first_name', 'last_name', 'username']
 

@@ -1,8 +1,8 @@
 from django.urls import path
-from .views import LoginViaTelegramView, TelegramCallbackView, WelcomeView
+from .views import LoginViaTelegramView, telegram_callback, WelcomeView
 
 urlpatterns = [
     path('login/', LoginViaTelegramView.as_view(), name='login'),
-    path('telegram_callback/', TelegramCallbackView.as_view(), name='telegram_callback'),
+    path('telegram_callback/', telegram_callback, name='telegram_callback'),
     path('welcome/', WelcomeView.as_view(), name='welcome'),
 ]

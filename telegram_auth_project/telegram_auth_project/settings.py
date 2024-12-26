@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'social_django',
     'myapp',
 ]
 
@@ -102,6 +103,14 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTHENTICATION_BACKENDS = (
+    'social_core.backends.telegram.TelegramAuth',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+SOCIAL_AUTH_TELEGRAM_BOT_TOKEN = '7982653482:AAEtitxQYmgSn6dNLvQGLpMdAst-80cK5z4'
+SOCIAL_AUTH_TELEGRAM_SCOPE = ['email', 'profile']
+SOCIAL_AUTH_TELEGRAM_EXTRA_DATA = ['first_name', 'last_name', 'username']
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/

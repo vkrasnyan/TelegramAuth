@@ -1,3 +1,5 @@
+import os
+
 import requests
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
@@ -6,7 +8,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-TOKEN = '7982653482:AAEtitxQYmgSn6dNLvQGLpMdAst-80cK5z4'
+BOT_TOKEN = '7982653482:AAEtitxQYmgSn6dNLvQGLpMdAst-80cK5z4'
 DJANGO_SERVER_URL = 'http://127.0.0.1:8000/telegram_callback'
 
 
@@ -33,6 +35,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("⚠️ Некорректная команда. Проверьте ссылку.")
 
 
-app = ApplicationBuilder().token(TOKEN).build()
+app = ApplicationBuilder().token(BOT_TOKEN).build()
 app.add_handler(CommandHandler("start", start))
 app.run_polling()

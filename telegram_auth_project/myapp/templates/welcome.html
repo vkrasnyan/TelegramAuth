@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block body %}
+  <h1>Добро пожаловать, {{ username }}!</h1>
+  <p>Вы успешно вошли через Telegram.</p>
+
+  {% if user.is_authenticated %}
+    <p>Привет, {{ username }}!
+  {% else %}
+    <p>Вы не авторизованы!</p>
+  {% endif %}
+
+
+{% endblock %}
